@@ -18,25 +18,61 @@ following this [invite link](https://discordapp.com/api/oauth2/authorize?client_
 
 ```
 -- General --
-help    : Show this help
-prefix  : Change this bot's command prefix
-role    : Set a required role to manage commands
-set     : Add or update a custom command
-sethelp : Add help text for a custom command
-remove  : Remove a custom command
-show    : Retrieve the JavaScript source of a command
+!help        : Show this help
+!evalprefix  : Change this bot's command prefix
+!role        : Set a required role to manage commands
+!set         : Add or update a custom command
+!sethelp     : Add help text for a custom command
+!remove      : Remove a custom command
+!show        : Retrieve the JavaScript source of a command
 ```
 
 ### Your first command
 
-By default, all commands are prefixed with `!`. As a server operator, you may
-change this if it conflict with another bot.
+Out of the box, all commands are prefixed with `!`. As a server operator, you
+can change this if it conflicts with another bot.
 
-TODO
+The `set` command creates (or updates) commands:
+
+```
+!set <command name> <JavaScript source>
+
+!set hello return "Hello, World!"
+```
+
+To get a list of all custom commands on your server, use the `help` command,
+which lists custom commands alongside Eval Bot's standard commands:
+
+```
+-- General --
+!help       : Show this help
+(...)
+
+-- This Server --
+!hello      : (no help text set)
+```
+
+The help text of a custom command can (optionally) be set by the `sethelp`
+command.
+
+```
+!sethelp <command name> <help text>
+
+!sethelp hello Run my very first command
+```
+
+Finally, for security and anti-griefing purposes, you can set a role that server
+members need to manage commands. This is done with the `role` command:
+
+```
+!role <the role>
+
+!role Cool Kids
+```
 
 ### Code samples
 
-Eval Bot scales to a variety of uses, from a simple communal bookmark tool to
+Eval Bot scales to a variety of uses, from simple community bookmarks to
 calculators to automated meme-making.
 
 Make fun of Reddit:
@@ -57,7 +93,7 @@ LMGTFY:
 return "https://lmgtfy.com/?q="+arguments.join("+")
 ```
 
-My personal favorite, MaKe SpOnGeBoB mEmE tExT:
+MaKe SpOnGeBoB mEmE tExT (the genesis of this project!):
 
 ```
 let t=function(t){let e=t.charCodeAt(0);return e>=97&&e<=122||e>=65&&e<=90},e=function(t){let e=t.charCodeAt(0);return e>=97&&e<=122?String.fromCharCode(e-32):t},r=function(t){let e=t.charCodeAt(0);return e>=65&&e<=90?String.fromCharCode(e+32):t},n="U",o=[];for(let l=0;l<arguments.length;l++){let u=arguments[l],f="";for(let o=0;o<u.length;o++){let l=u[o];t(l)?"U"===n?(f+=e(l),n="L"):"L"===n&&(f+=r(l),n="U"):f+=l}o.push(f)}return o.join(" ")
@@ -67,7 +103,7 @@ let t=function(t){let e=t.charCodeAt(0);return e>=97&&e<=122||e>=65&&e<=90},e=fu
 
 Eval Bot uses [Python Mini Racer](https://github.com/sqreen/PyMiniRacer) to
 interpret JavaScript code, which includes the standard library (`Math`, `String`,
-etc.).
+etc.) and ECMAScript 6 features.
 
 Currently, snippets have the following limitations:
 
@@ -81,17 +117,17 @@ Currently, snippets have the following limitations:
 
 Internally, JavaScript commands are represented as functions
 (`<name> = function () { ... }`), and your job as a snippet writer is simply to
-fill in the body. When your function is called on Discord, all arguments--
-specifically, all whitespace-separated words--are passed to your function in the
-form of a variable-length list of strings.
+fill in the body. When your function is called on Discord, all
+arguments--specifically, all whitespace-separated words--are passed to your
+function in the form of a variable-length list of strings.
 
-Thus,
+Thus, the Discord message
 
 ```
 !say hello world!
 ```
 
-becomes
+is translated to JavaScript code as
 
 ```
 say("hello", "world!")
@@ -100,6 +136,9 @@ say("hello", "world!")
 You can access these arguments using the JavaScript-standard (and appropriately
 named) `arguments` array.
 
-In short, to produce a snippet, simply write a standalone JavaScript function,
-then [minify it](https://javascript-minifier.com), and finally strip the
-function declaration.
+In short, to produce a snippet:
+
+1. Write a standalone JavaScript function.
+2. [Minify it](https://javascript-minifier.com) to compress its source code.
+3. Strip the function declaration and feed the function body to the `set`
+   command.
