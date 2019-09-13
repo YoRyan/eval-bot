@@ -213,8 +213,11 @@ class EvalClient(discord.Client):
         if not split or len(split) == 1:
             raise EvalException('Expected usage: set <command> <javascript code>')
 
-        guild_sf = str(message.guild.id)
         function = split[0].lower()
+        if self._is_builtin(function):
+            raise EvalException('You cannot override a built-in command.')
+
+        guild_sf = str(message.guild.id)
         source = split[1]
         cursor = self._db.execute(
                 'SELECT EXISTS (SELECT 1 from commands WHERE guild=? AND command=?)',
@@ -236,8 +239,11 @@ class EvalClient(discord.Client):
         if not split or len(split) == 1:
             raise EvalException('Expected usage: set <command> <help text>')
 
-        guild_sf = str(message.guild.id)
         function = split[0].lower()
+        if self._is_builtin(function):
+            raise EvalException('You cannot override a built-in command.')
+
+        guild_sf = str(message.guild.id)
         text = split[1]
         cursor = self._db.execute(
                 'SELECT EXISTS (SELECT 1 from commands WHERE guild=? AND command=?)',
@@ -255,8 +261,11 @@ class EvalClient(discord.Client):
         if not args_string:
             raise EvalException('Expected usage: remove <command>')
 
-        guild_sf = str(message.guild.id)
         function = args_string.split()[0].lower()
+        if self._is_builtin(function):
+            raise EvalException('You cannot delete a built-in command.')
+
+        guild_sf = str(message.guild.id)
         cursor = self._db.execute(
                 'SELECT EXISTS (SELECT 1 from commands WHERE guild=? AND command=?)',
                 (guild_sf, function))
@@ -272,8 +281,11 @@ class EvalClient(discord.Client):
         if not args_string:
             raise EvalException('Expected usage: show <command>')
 
-        guild_sf = str(message.guild.id)
         function = args_string.split()[0].lower()
+        if self._is_builtin(function):
+            raise EvalException('Built-in commands do not have JavaScript code.')
+
+        guild_sf = str(message.guild.id)
         cursor = self._db.execute(
                 'SELECT source FROM commands WHERE guild=? AND command=?',
                 (guild_sf, function))
@@ -304,6 +316,10 @@ class EvalClient(discord.Client):
                 await notify(message.channel, '(empty string)')
             else:
                 await message.channel.send(str(returned))
+
+    def _is_builtin(self, command):
+        return command.lower() in ['help', 'prefix', 'role', 'set', 'sethelp',
+                                   'remove', 'show']
 
 
 def execute_javascript(function, source, args):
