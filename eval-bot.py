@@ -100,7 +100,7 @@ class EvalClient(discord.Client):
         try:
             if command == 'help':
                 await self._help_command(message)
-            elif command == 'prefix':
+            elif command == 'evalprefix':
                 self._authenticate(message)
                 await self._prefix_command(message, args_string)
             elif command == 'role':
@@ -139,7 +139,7 @@ class EvalClient(discord.Client):
     async def _help_command(self, message):
         builtins = {
             'help': 'Show this help',
-            'prefix': "Change this bot's command prefix",
+            'evalprefix': "Change this bot's command prefix",
             'role': 'Set a required role to manage commands',
             'set': 'Add or update a custom command',
             'sethelp': 'Add help text for a custom command',
@@ -182,7 +182,7 @@ class EvalClient(discord.Client):
 
     async def _prefix_command(self, message, args_string):
         if not args_string:
-            raise EvalException('Expected usage: prefix <new prefix>')
+            raise EvalException('Expected usage: evalprefix <new prefix>')
         elif len(args_string) != 1:
             raise EvalException('New prefix must be a single character')
 
@@ -318,8 +318,8 @@ class EvalClient(discord.Client):
                 await message.channel.send(str(returned))
 
     def _is_builtin(self, command):
-        return command.lower() in ['help', 'prefix', 'role', 'set', 'sethelp',
-                                   'remove', 'show']
+        return command.lower() in ['help', 'evalprefix', 'role', 'set',
+                                   'sethelp', 'remove', 'show']
 
 
 def execute_javascript(function, source, args):
