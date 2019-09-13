@@ -340,8 +340,9 @@ def execute_javascript(function, source, args):
 
     def stringify(s): return '"%s"' % s.replace('"', '\\"')
     eval_args = ','.join(stringify(a) for a in args)
-    return interpreter.eval('%s(%s)' % (function, eval_args),
-                            timeout=EvalClient.JS_TIMEOUT, max_memory=JS_MEMORY)
+    return interpreter.eval(
+            '%s(%s)' % (function, eval_args),
+            timeout=EvalClient.JS_TIMEOUT, max_memory=EvalClient.JS_MEMORY)
 
 
 async def notify(channel, message):
