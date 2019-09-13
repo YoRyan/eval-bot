@@ -157,26 +157,38 @@ class EvalClient(discord.Client):
                     text = '(no help text set)'
                 table[command] = text
             return table
-        customs = custom_commands(message.guild)
+        guild = message.guild
+        customs = custom_commands(guild)
 
-        def print_table(command_length, text_map):
+        def print_table(prefix, command_length, text_map):
             result = ''
             for command, text in text_map.items():
-                result += command.ljust(command_length) + ' : ' + text + '\n'
+                result += prefix
+                result += command.ljust(command_length)
+                result += ' : '
+                result += text
+                result += '\n'
             return result
         def max_length(text_map): return (max(len(key) for key in text_map.keys())
                                           if len(text_map) > 0 else 0)
         length = max(max_length(builtins), max_length(customs))
+        def get_prefix(guild):
+            guild_sf = str(guild.id)
+            cursor = self._db.execute(
+                    'SELECT prefix FROM preferences WHERE guild=?', (guild_sf,))
+            result = cursor.fetchone()
+            return result[0]
+        prefix = get_prefix(guild)
 
         text = '```'
         text += '-- General --\n'
-        text += print_table(length, builtins)
+        text += print_table(prefix, length, builtins)
         text += '\n'
         text += '-- This Server --\n'
         if len(customs) == 0:
             text += '(no commands yet)'
         else:
-            text += print_table(length, customs)
+            text += print_table(prefix, length, customs)
         text += '```'
         await message.channel.send(text)
 
