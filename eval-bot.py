@@ -40,7 +40,7 @@ class EvalException(Exception):
 class EvalClient(discord.Client):
 
     DEFAULT_PREFIX = '!'
-    JS_TIMEOUT = 10
+    JS_TIMEOUT = 10*1000
     JS_MEMORY = 50
 
     def __init__(self, database, *args, **kwargs):
